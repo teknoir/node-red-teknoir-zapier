@@ -1,0 +1,24 @@
+{
+    "name": "node-red-teknoir-zapier",
+    "version": "0.0.2",
+    "description": "Node-red nodes to work with zapier",
+    "author": "Anders Åslund",
+    "license": "MIT",
+    "homepage": "https://github.com/teknoir/node-red-teknoir-zapier",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/teknoir/node-red-teknoir-zapier.git"
+    },
+    "keywords": [ "node-red", "zapier" ],
+    "node-red": {
+        "nodes": {
+            "zapier_conf" : "src/conf.js",
+            "zapier_trigger": "src/trigger.js",
+            "zapier_action" : "src/ction.js"
+        }
+    },
+    "dependencies": {
+        "url-parse": "1.4.7",
+        "body-parser": "1.20.2"
+    }
+}
