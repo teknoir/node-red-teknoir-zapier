@@ -14,7 +14,7 @@
         "nodes": {
             "zapier_conf" : "src/conf.js",
             "zapier_trigger": "src/trigger.js",
-            "zapier_action" : "src/ction.js"
+            "zapier_action" : "src/action.js"
         }
     },
     "dependencies": {
