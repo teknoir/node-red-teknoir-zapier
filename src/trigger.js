@@ -1,4 +1,4 @@
-const http = require('node:http');
+const { http } = require('follow-redirects')
 const urlparse = require('url-parse')
 var bodyParser = require('body-parser')
 
@@ -14,15 +14,16 @@ module.exports = function(RED) {
         trigger_nodes.push(o)
         this.token = RED.nodes.getNode(n.conf).token
         node.on('input', function(msg) {
-          if (!trigger_webhooks[this.id]){
-            node.error("Webhook Not Defined, check there is an active Zap for this trigger")
-          }
-          let url = trigger_webhooks[this.id]
           this.last_msg = {
             id: msg._msgid,
             topic : msg.topic,
             payload : msg.payload
           }
+          if (!trigger_webhooks[this.id]){
+            node.error("Webhook Not Defined, check there is an active Zap for this trigger, or ignore if you are creating a new Zap, it´s normal")
+            return
+          }
+          let url = trigger_webhooks[this.id]
           const msg_data = JSON.stringify(this.last_msg)
 
           let parsed_url = urlparse(url, true)
@@ -36,17 +37,16 @@ module.exports = function(RED) {
               'Content-Length': Buffer.byteLength(msg_data),
             },
           }
-          const req = http.request(options, (res) => {
-            console.log(`statusCode: ${res.statusCode}`)
-            res.setEncoding('utf8');
-            if (res.statusCode != 200){
-              node.error(res.statusCode+': '+res.statusMessage)
+          const req = http.request(options, (resolve) => {
+            resolve.setEncoding('utf8');
+            if (resolve.statusCode != 200){
+              node.error(resolve.statusCode+': '+resolve.statusMessage)
             }
-            res.on('data', function (chunk) {
-              console.log('BODY:', chunk);
+            resolve.on('data', function (chunk) {
+              node.debug(chunk.toString())
             });
-            res.on('end', function () {
-              console.log('No more data in response.');
+            resolve.on('end', function () {
+              node.debug('End')
             });
           })
           req.on('error', (error) => {
@@ -79,6 +79,7 @@ module.exports = function(RED) {
 
   RED.httpNode.post('/_zapier/triggers/:id', function(req, res){ 
     let target_node = RED.nodes.getNode(req.params.id)
+    target_node.error("Webhook Received")
     if (target_node){
       if (target_node.token == req.headers['teknoir-devstudio-auth-header']){
         trigger_webhooks[req.params.id] = req.body.webhook
@@ -118,9 +119,11 @@ module.exports = function(RED) {
     if (target_node){
       if (target_node.token == req.headers['teknoir-devstudio-auth-header']){
         const sample = {
-          "payload": "This is a Sample as no message has been received by the node yet",
+          "payload": {
+            "message": "This is a Sample as no message has been received by the node yet"
+          },
           "id" : "11111111.aaaaaa",
-          "topic" : "Sample"
+          "topic" : "zapier_trigger"
         }
         let response = target_node.last_msg || sample
         res.send([response])
@@ -146,10 +149,6 @@ module.exports = function(RED) {
     }
   })
 
-
   var trigger_nodes = []; 
   var trigger_webhooks= RED.settings.get('zapierTriggerWebhooks') || {}
-
-  
-
 }

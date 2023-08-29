@@ -1,7 +1,7 @@
 {
     "name": "node-red-teknoir-zapier",
     "version": "0.0.2",
-    "description": "Node-red nodes to work with zapier",
+    "description": "Devstudio nodes to work with Zapier",
     "author": "Anders Åslund",
     "license": "MIT",
     "homepage": "https://github.com/teknoir/node-red-teknoir-zapier",
@@ -18,7 +18,8 @@
         }
     },
     "dependencies": {
-        "url-parse": "1.4.7",
-        "body-parser": "1.20.2"
+        "url-parse": "1.5.9",
+        "body-parser": "1.20.2",
+        "follow-redirects": "1.15.2"
     }
 }
