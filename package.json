@@ -1,6 +1,6 @@
 {
     "name": "node-red-teknoir-zapier",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Devstudio nodes to work with Zapier",
     "author": "Anders Åslund",
     "license": "MIT",
@@ -9,12 +9,11 @@
         "type": "git",
         "url": "git://github.com/teknoir/node-red-teknoir-zapier.git"
     },
-    "keywords": [ "node-red", "zapier" ],
+    "keywords": [ "node-red", "teknoir", "zapier" ],
     "node-red": {
         "nodes": {
-            "zapier_conf" : "src/conf.js",
-            "zapier_trigger": "src/trigger.js",
-            "zapier_action" : "src/action.js"
+            "zap_trigger": "src/trigger.js",
+            "zap_action" : "src/action.js"
         }
     },
     "dependencies": {

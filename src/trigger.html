@@ -1,33 +1,66 @@
+<style>
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+
+
+    /* Firefox */
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+</style>
+
 <script type="text/javascript">
-  RED.nodes.registerType('zapier_trigger',{
-      category: 'network',
-      color: '#ffffff',
-      defaults: {
-        name: {default: ""},
-        conf: {value:"", type:"zapier_conf"},
-      },
-      inputs:1,
-      outputs:0,
-      icon: "tn_dark.svg",
-      label : function() {
-          return "trigger: "+this.name;
-      },
-      paletteLabel: "Zapier Trigger"
-  });
+    RED.nodes.registerType('zap_trigger', {
+        category: 'network',
+        color: '#ffffff',
+        defaults: {
+            name: {value: ""},
+            url: {value: "wrong url"},
+            cache: {value: 50, validate: RED.validators.number(), required: true},
+        },
+        inputs: 1,
+        outputs: 0,
+        icon: "tn_dark.svg",
+        label: function () {
+            return this.name || "zap trigger";
+        },
+        paletteLabel: "Zapier Trigger",
+        oneditprepare: function () {
+            $("#node-input-url").val(window.location.origin + "/_zap/trigger/" + this.id);
+            $("#node-input-cache").val(this.cache);
+        }
+    });
+
+    function copyURL() {
+        var copyText = document.getElementById("node-input-url");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); /*For mobile devices*/
+        document.execCommand("copy");
+        alert("Token copied to clipboard");
+    }
 </script>
 
-<script type="text/x-red" data-template-name="zapier_trigger">
-  <div class="form-row">
-    <label for="node-config-input-conf">Zapier Config</label>
-    <input type="text" id="node-input-conf">
-  </div>
-  <div class="form-row">
-      <label for="node-input-name">Name</label>
-      <input type="text" id="node-input-name" placeholder="Name of the Triger">
-  </div>
+<script type="text/x-red" data-template-name="zap_trigger">
+    <div class="form-row">
+        <label for="node-input-name">Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-cache">Cache size</label>
+        <input type="number" id="node-input-cache" placeholder="Cache Size">
+    </div>
+    <div class="form-row" style="display: flex;">
+        <label for="node-input-url">URL</label>
+        <input type="text" id="node-input-url" readonly>
+        <a id="node-input-copy-url" title="Copy URL to Clipboard" class="red-ui-button" onclick="copyURL()"><i class="fa fa-clipboard"></i></a>
+    </div>
 </script>
 
-
-<script type="text/x-red" data-help-name="zapier_trigger">
-  <p>Sends msg.payload to Zapier as a trigger</p>
+<script type="text/x-red" data-help-name="zap_trigger">
+    <p>Sends msg.payload to Zapier as a trigger</p>
 </script>

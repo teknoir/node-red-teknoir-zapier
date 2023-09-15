@@ -1,34 +1,45 @@
 <script type="text/javascript">
-    RED.nodes.registerType('zapier_action',{
+    RED.nodes.registerType('zap_action', {
         category: 'network',
         color: '#FFFFFF',
         defaults: {
-          name: {default: ""},
-          conf: {value:"", type:"zapier_conf"},
+            name: {value: ""},
+            url: {value: "wrong url"},
         },
-        inputs:0,
-        outputs:1,
+        inputs: 0,
+        outputs: 1,
         icon: "tn_dark.svg",
-        label: function() {
-            return "action: "+this.name;
+        label: function () {
+            return this.name || "zap action";
         },
-        paletteLabel: "Zapier Action"
+        paletteLabel: "Zapier Action",
+        oneditprepare: function () {
+            $("#node-input-url").val(window.location.origin + "/_zap/action/" + this.id);
+        }
     });
+
+    function copyURL() {
+        var copyText = document.getElementById("node-input-url");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); /*For mobile devices*/
+        document.execCommand("copy");
+        alert("Token copied to clipboard");
+    }
 </script>
 
-<script type="text/x-red" data-template-name="zapier_action">
-    <div class="form-row">
-        <label for="node-config-input-conf">Zapier Config</label>
-        <input type="text" id="node-input-conf" >
-    </div>
-
+<script type="text/x-red" data-template-name="zap_action">
     <div class="form-row">
         <label for="node-input-name">Name</label>
-        <input type="text" id="node-input-name" placeholder="Name of the Action">
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row" style="display: flex;">
+        <label for="node-input-url">URL</label>
+        <input type="text" id="node-input-url" readonly>
+        <a id="node-input-copy-url" title="Copy URL to Clipboard" class="red-ui-button" onclick="copyURL()"><i class="fa fa-clipboard"></i></a>
     </div>
 </script>
 
 
-<script type="text/x-red" data-help-name="zapier_action">
+<script type="text/x-red" data-help-name="zap_action">
     <p>When Zapier invokes an action this node outputs the data from that action</p>
 </script>

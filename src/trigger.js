@@ -1,154 +1,145 @@
-const { http } = require('follow-redirects')
+const {http} = require('follow-redirects')
 const urlparse = require('url-parse')
 var bodyParser = require('body-parser')
 
 
-module.exports = function(RED) {
-  function trigger(n) {
+module.exports = function (RED) {
+    function trigger(n) {
         RED.nodes.createNode(this, n);
         var node = this;
         this.name = n.name
-        let o ={}
-        o.name = this.name 
-        o.id = this.id
-        trigger_nodes.push(o)
-        this.token = RED.nodes.getNode(n.conf).token
-        node.on('input', function(msg) {
-          this.last_msg = {
-            id: msg._msgid,
-            topic : msg.topic,
-            payload : msg.payload
-          }
-          if (!trigger_webhooks[this.id]){
-            node.error("Webhook Not Defined, check there is an active Zap for this trigger, or ignore if you are creating a new Zap, it´s normal")
-            return
-          }
-          let url = trigger_webhooks[this.id]
-          const msg_data = JSON.stringify(this.last_msg)
 
-          let parsed_url = urlparse(url, true)
-          const options = {
-            hostname: parsed_url.hostname,
-            port: parsed_url.port,
-            path: parsed_url.pathname,
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Content-Length': Buffer.byteLength(msg_data),
-            },
-          }
-          const req = http.request(options, (resolve) => {
-            resolve.setEncoding('utf8');
-            if (resolve.statusCode != 200){
-              node.error(resolve.statusCode+': '+resolve.statusMessage)
+        node.on('input', function (msg) {
+            const subscribed = node.context().get('subscribed')
+            if (!subscribed) {
+                node.status({fill: "red", shape: "dot", text: "unsubscribed"});
+                return
             }
-            resolve.on('data', function (chunk) {
-              node.debug(chunk.toString())
-            });
-            resolve.on('end', function () {
-              node.debug('End')
-            });
-          })
-          req.on('error', (error) => {
-            node.error(error);
-          })
-          req.write(msg_data);
-          req.end();
-        })
-        this.on("close", function(removed, done) {
-          var node = this;
-          trigger_nodes.map(function(x, i){
-            if (x.id == node.id){
-              trigger_nodes.splice(i, 1)
+
+            let msg_cache = node.context().get('cache')
+            if (!msg_cache) {
+                msg_cache = []
+                node.context().set('cache', msg_cache)
             }
-          }) 
-          if (removed){          
-            delete trigger_webhooks[node.id]
-            if (Object.keys(trigger_webhooks).length == 0){
-              RED.settings.delete('zapierTriggerWebhooks')
+
+            if (msg_cache.length > 99) {
+                node.status({fill: "orange", shape: "dot", text: "cache full: message dropped"});
+                msg_cache.shift()
+                msg_cache.push(msg)
             } else {
-              RED.settings.set('zapierTriggerWebhooks', trigger_webhooks)
+                node.status({fill: "green", shape: "dot", text: `cache size: ${msg_cache.length}`});
+                msg_cache.push(msg)
             }
-          }
-          done()
         })
-  }
-  RED.nodes.registerType("zapier_trigger",trigger);
-  
-  RED.httpNode.use('/_zapier/triggers/*', bodyParser.json());
-
-  RED.httpNode.post('/_zapier/triggers/:id', function(req, res){ 
-    let target_node = RED.nodes.getNode(req.params.id)
-    target_node.error("Webhook Received")
-    if (target_node){
-      if (target_node.token == req.headers['teknoir-devstudio-auth-header']){
-        trigger_webhooks[req.params.id] = req.body.webhook
-        let r = RED.settings.set('zapierTriggerWebhooks', trigger_webhooks)
-        r.then(function(v) {
-          res.send({status: 'ok'});
-        })
-      } else {
-        res.sendStatus(403);
-      }
-    } else {
-      res.sendStatus(404);      
+        // this.on("close", function (removed, done) {
+        //     var node = this;
+        //     trigger_nodes.map(function (x, i) {
+        //         if (x.id == node.id) {
+        //             trigger_nodes.splice(i, 1)
+        //         }
+        //     })
+        //     if (removed) {
+        //         delete trigger_webhooks[node.id]
+        //         if (Object.keys(trigger_webhooks).length == 0) {
+        //             RED.settings.delete('zapierTriggerWebhooks')
+        //         } else {
+        //             RED.settings.set('zapierTriggerWebhooks', trigger_webhooks)
+        //         }
+        //     }
+        //     done()
+        // })
     }
-  })
 
-  RED.httpNode.delete('/_zapier/triggers/:id', function(req, res){ 
-    let target_node = RED.nodes.getNode(req.params.id)
-    if (target_node){
-      if (target_node.token == req.headers['teknoir-devstudio-auth-header']){
-        delete trigger_webhooks[req.params.id]
-        if (Object.keys(trigger_webhooks).length == 0){
-          RED.settings.delete('zapierTriggerWebhooks')
-        } else {
-          let r = RED.settings.set('zapierTriggerWebhooks', trigger_webhooks)
+    RED.nodes.registerType("zap_trigger", trigger);
+
+    RED.httpNode.post('/_zap/trigger/:id', function (req, res) {
+            let target_node = RED.nodes.getNode(req.params.id)
+            if (target_node) {
+                const subscribed = target_node.context().get('subscribed')
+
+                //Allow only one subscriber
+                if (subscribed) {
+                    res.sendStatus(403);
+                }
+
+                // Register a subscription
+                target_node.context().set('subscribed', true)
+
+                target_node.status({fill: "green", shape: "dot", text: "subscribed"});
+
+                res.sendStatus(200);
+            } else {
+                res.sendStatus(404);
+            }
         }
-        res.sendStatus(204);
-      } else {
-        res.sendStatus(403);
-      }
-    } else {
-      res.sendStatus(404);      
-    }
-  })
+    )
 
-  RED.httpNode.get('/_zapier/triggers/:id', function(req, res){ 
-    let target_node = RED.nodes.getNode(req.params.id)
-    if (target_node){
-      if (target_node.token == req.headers['teknoir-devstudio-auth-header']){
-        const sample = {
-          "payload": {
-            "message": "This is a Sample as no message has been received by the node yet"
-          },
-          "id" : "11111111.aaaaaa",
-          "topic" : "zapier_trigger"
+    RED.httpNode.delete('/_zap/trigger/:id', function (req, res) {
+            let target_node = RED.nodes.getNode(req.params.id)
+            if (target_node) {
+
+                // De-register a subscription
+                target_node.context().set('subscribed', false)
+                target_node .status({fill: "red", shape: "dot", text: "unsubscribed"});
+
+
+                res.sendStatus(200);
+            } else {
+                res.sendStatus(404);
+            }
         }
-        let response = target_node.last_msg || sample
-        res.send([response])
-      } else {
-        res.sendStatus(403);
-      }
-    } else {
-      res.sendStatus(404);      
-    }
-  })
+    )
 
-  RED.httpNode.get('/_zapier/triggers', function(req, res){
-    var tokens = []
-    for (x in trigger_nodes){
-      let nid = trigger_nodes[x]['id']
-      tokens.push(RED.nodes.getNode(nid).token)
-    }
+    RED.httpNode.get('/_zap/trigger/:id', function (req, res) {
+            let target_node = RED.nodes.getNode(req.params.id)
+            if (target_node) {
+                const now = new Date()
+                let end_time = now
+                end_time.setHours(end_time.getHours() + 1)
+                const samples = [
+                    {
+                        // From event
+                        "id": "11111111.aaaaaa",
+                        // From node or event
+                        "topic": "zapier_trigger",
+                        // From upstream
+                        "creation_time": now.toISOString(),
+                        "last_modification": now.toISOString(),
+                        "time_to_live": 60000,
+                        "detection_id": "64ff364f2325eb0001513837",
+                        "type": "nearvehicle",
+                        "label": "person",
+                        "country": "us",
+                        "region": "texas",
+                        "branch": "southwest",
+                        "facility": "warehouse",
+                        "site": "houston",
+                        "zone": "teknoir",
+                        "group": "demo",
+                        "peripheral_type": "camera",
+                        "peripheral_name": "warehouse_1",
+                        "peripheral_id": "kaufbfu1",
+                        "start_time": now.toISOString(),
+                        "from_device": "device_id",
+                        "severity": "msg.payload.severity",
+                        "message": "msg.payload.severity" + ": " + "msg.payload.type" + " observed at SITE:" + "msg.payload.site" + ", ZONE:" + "msg.payload.zone" + " at " + "msg.payload.timestamp",
+                        "proof": ["???"],
+                        "annotations": ["???"],
+                        "end_time": end_time.toISOString(),
+                        "duration": end_time.getTime() - now.getTime(),
+                        "count": 7,
+                    }
+                ]
 
-    if (tokens.indexOf(req.headers['teknoir-devstudio-auth-header']) > -1) {
-      res.json({triggers: trigger_nodes});
-    } else{
-      res.sendStatus(403);
-    }
-  })
+                const msg_cache = target_node.context().get('cache')
 
-  var trigger_nodes = []; 
-  var trigger_webhooks= RED.settings.get('zapierTriggerWebhooks') || {}
+                let response = msg_cache || samples
+                target_node.context().set('cache', [])
+                target_node.status({fill: "green", shape: "dot", text: `cache emptied`});
+                res.send(response)
+            } else {
+                res.sendStatus(404);
+            }
+        }
+    )
 }
