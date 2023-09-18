@@ -27,7 +27,7 @@ module.exports = function (RED) {
                 msg_cache.shift()
                 msg_cache.push(msg)
             } else {
-                node.status({fill: "green", shape: "dot", text: `cache size: ${msg_cache.length}`});
+                node.status({fill: "green", shape: "dot", text: "cache size: "+msg_cache.length});
                 msg_cache.push(msg)
             }
         })
@@ -80,7 +80,7 @@ module.exports = function (RED) {
 
                 // De-register a subscription
                 target_node.context().set('subscribed', false)
-                target_node .status({fill: "red", shape: "dot", text: "unsubscribed"});
+                target_node.status({fill: "red", shape: "dot", text: "unsubscribed"});
 
 
                 res.sendStatus(200);
@@ -134,8 +134,8 @@ module.exports = function (RED) {
                 const msg_cache = target_node.context().get('cache')
 
                 let response = msg_cache || samples
-                target_node.context().set('cache', [])
-                target_node.status({fill: "green", shape: "dot", text: "cache emptied"});
+                //target_node.context().set('cache', [])
+                //target_node.status({fill: "green", shape: "dot", text: "cache emptied"});
                 res.send(response)
             } else {
                 res.sendStatus(404);
