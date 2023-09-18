@@ -63,4 +63,41 @@
 
 <script type="text/x-red" data-help-name="zap_trigger">
     <p>Sends msg.payload to Zapier as a trigger</p>
+    Payload is expected to be an array of samples, each sample is an object with the following properties:
+    <pre>
+        <code>
+msg.payload = [
+    {
+        "id": "UNIQUE_ID",
+        "topic": "A_CUSTOM_TOPIC",
+        "creation_time": "ISO_8601_STRING",
+        "last_modification": "ISO_8601_STRING",
+        "time_to_live": 60000,
+        "detection_id": "64ff364f2325eb0001513837",
+        "type": "nearvehicle",
+        "label": "person",
+        "country": "us",
+        "region": "texas",
+        "branch": "southwest",
+        "facility": "warehouse",
+        "site": "houston",
+        "zone": "teknoir",
+        "group": "demo",
+        "peripheral_type": "camera",
+        "peripheral_name": "warehouse_1",
+        "peripheral_id": "kaufbfu1",
+        "start_time": "ISO_8601_STRING",
+        "from_device": "device_id",
+        "severity": "TestSeverity",
+        "message": "This is a Sample as no message has been received by the node yet",
+        "proof": ["???"],
+        "annotations": ["???"],
+        "end_time": "ISO_8601_STRING",
+        "duration": end_time.getTime() - now.getTime(),
+        "count": 1,
+    }
+]
+        </code>
+    </pre>
+
 </script>
