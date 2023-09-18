@@ -28,7 +28,7 @@ module.exports = function (RED) {
             } else {
                 node.status({ fill: "green", shape: "dot", text: `cache size: ${msg_cache.length + 1}` });
             }
-            msg_cache.push(msg);
+            msg_cache.push(msg.payload);
             node.context().set('cache', msg_cache);
         });
     }
