@@ -14,7 +14,7 @@
         },
         paletteLabel: "Zapier Action",
         oneditprepare: function () {
-            $("#node-input-url").val(window.location.origin + "/_zap/action/" + this.id);
+            $("#node-input-url").val(window.location.origin + window.location.pathname + "_zap/action/" + this.id);
         }
     });
 
