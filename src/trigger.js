@@ -135,7 +135,7 @@ module.exports = function (RED) {
 
                 let response = msg_cache || samples
                 target_node.context().set('cache', [])
-                target_node.status({fill: "green", shape: "dot", text: `cache emptied`});
+                target_node.status({fill: "green", shape: "dot", text: "cache emptied"});
                 res.send(response)
             } else {
                 res.sendStatus(404);
