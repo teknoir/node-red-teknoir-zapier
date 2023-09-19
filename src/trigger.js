@@ -12,7 +12,7 @@ module.exports = function (RED) {
         node.on('input', function (msg) {
             const subscribed = node.context().get('subscribed');
             if (!subscribed) {
-                node.status({ fill: "red", shape: "dot", text: "unsubscribed" });
+                node.status({fill: "red", shape: "dot", text: "unsubscribed"});
                 return
             }
 
@@ -21,26 +21,25 @@ module.exports = function (RED) {
                 msg_cache = []
                 node.context().set('cache', msg_cache)
             }
-            
+
             // Check if msg.payload is an array
-            
+
             if (Array.isArray(msg.payload)) {
                 msg.payload.forEach((singleMsg) => {
                     if (msg_cache.length >= node.cache) {
                         node.status({ fill: "orange", shape: "dot", text: "cache full: oldest message removed" });
-                        msg_cache.shift();  
+                        msg_cache.shift();
                     }
                     msg_cache.push(singleMsg);
                 });
             } else {
                 if (msg_cache.length >= node.cache) {
                     node.status({ fill: "orange", shape: "dot", text: "cache full: oldest message removed" });
-                    msg_cache.shift();  
+                    msg_cache.shift();
                 }
                 msg_cache.push(msg.payload);
-                node.status({ fill: "green", shape: "dot", text: `cache size: ${msg_cache.length + 1}` });
             }
-        
+
             node.context().set('cache', msg_cache);
             node.status({ fill: "green", shape: "dot", text: `cache size: ${msg_cache.length}` });
 
@@ -54,8 +53,11 @@ module.exports = function (RED) {
         if (target_node) {
             target_node.context().set('subscribed', isSubscribe);
             const statusText = isSubscribe ? "subscribed" : "unsubscribed";
-            target_node.status({ fill: isSubscribe ? "green" : "red", shape: "dot", text: statusText });
-            res.sendStatus(200);
+            target_node.status({fill: isSubscribe ? "green" : "red", shape: "dot", text: statusText});
+            const msg = {
+                "message": statusText,
+            }
+            res.send(msg);
         } else {
             res.sendStatus(404);
         }
