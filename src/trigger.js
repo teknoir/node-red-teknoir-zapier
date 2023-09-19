@@ -56,7 +56,6 @@ module.exports = function (RED) {
                 node.status({ fill: "red", shape: "dot", text: "unsubscribed or no hook URL" });
             }
 
-
             node.status({ fill: "green", shape: "dot", text: "cache size: " +msg_cache.length });
 
         });
@@ -70,14 +69,19 @@ module.exports = function (RED) {
         if (target_node) {
             target_node.context().set('subscribed', isSubscribe);
 
-            target_node.context().set('hookUrl', req.body['hookUrl']); // Store the hook URL
-
-            // if (req.body && req.body.hookUrl) {
-            //     target_node.context().set('hookUrl', req.body.hookUrl); // Store the hook URL
-            // }
+            if (isSubscribe) {
+                // Handle subscription
+                target_node.context().set('hookUrl', req.body['hookUrl']); // Store the hook URL
+            } else {
+                // Handle unsubscription
+                target_node.context().set('hookUrl', null); // Remove the hook URL
+                target_node.context().set('cache', []); // Empty the cache
+            }
 
             const statusText = isSubscribe ? "subscribed" : "unsubscribed";
+
             target_node.status({fill: isSubscribe ? "green" : "red", shape: "dot", text: statusText});
+            
             const msg = {
                 "message": statusText,
             }
