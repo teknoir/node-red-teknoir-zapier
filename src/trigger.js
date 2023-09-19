@@ -65,13 +65,16 @@ module.exports = function (RED) {
     RED.nodes.registerType("zap_trigger", trigger);
 
     function handleSubscription(req, res, isSubscribe) {
+
         let target_node = RED.nodes.getNode(req.params.id);
         if (target_node) {
             target_node.context().set('subscribed', isSubscribe);
-            
-            if (req.body && req.body.hookUrl) {
-                target_node.context().set('hookUrl', req.body.hookUrl); // Store the hook URL
-            }
+
+            target_node.context().set('hookUrl', req.body['hookUrl']); // Store the hook URL
+
+            // if (req.body && req.body.hookUrl) {
+            //     target_node.context().set('hookUrl', req.body.hookUrl); // Store the hook URL
+            // }
 
             const statusText = isSubscribe ? "subscribed" : "unsubscribed";
             target_node.status({fill: isSubscribe ? "green" : "red", shape: "dot", text: statusText});
@@ -83,6 +86,7 @@ module.exports = function (RED) {
             res.sendStatus(404);
         }
     }
+
     RED.httpNode.use('/_zap/trigger/*', bodyParser.json());
     RED.httpNode.post('/_zap/trigger/:id', (req, res) => handleSubscription(req, res, true));
     RED.httpNode.delete('/_zap/trigger/:id', (req, res) => handleSubscription(req, res, false));
