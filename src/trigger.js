@@ -1,6 +1,4 @@
-const { http } = require('follow-redirects');
-const urlparse = require('url-parse');
-var bodyParser = require('body-parser');
+const axios = require('axios');
 
 module.exports = function (RED) {
     function trigger(n) {
@@ -11,9 +9,12 @@ module.exports = function (RED) {
 
         node.on('input', function (msg) {
             const subscribed = node.context().get('subscribed');
-            if (!subscribed) {
-                node.status({fill: "red", shape: "dot", text: "unsubscribed"});
-                return
+            const hookUrl = node.context().get('hookUrl'); // Get the stored hook URL
+    
+            
+            if (!subscribed || !hookUrl) {
+                node.status({ fill: "red", shape: "dot", text: "Unsubscribed or there is no hook URL" });
+                return;
             }
 
             let msg_cache = node.context().get('cache')
@@ -41,6 +42,15 @@ module.exports = function (RED) {
             }
 
             node.context().set('cache', msg_cache);
+            
+            axios.post(hookUrl, { data: msg.payload })
+                .then(response => {
+                    console.log('Successfully sent data to Zapier:', response.data);
+                })
+                .catch(error => {
+                    console.error('Error sending data to Zapier:', error);
+                });
+
             node.status({ fill: "green", shape: "dot", text: `cache size: ${msg_cache.length}` });
 
         });
@@ -52,6 +62,11 @@ module.exports = function (RED) {
         let target_node = RED.nodes.getNode(req.params.id);
         if (target_node) {
             target_node.context().set('subscribed', isSubscribe);
+
+            if (isSubscribe && req.body && req.body.hookUrl) {
+                target_node.context().set('hookUrl', req.body.hookUrl); // Store the hook URL
+            }
+
             const statusText = isSubscribe ? "subscribed" : "unsubscribed";
             target_node.status({fill: isSubscribe ? "green" : "red", shape: "dot", text: statusText});
             const msg = {

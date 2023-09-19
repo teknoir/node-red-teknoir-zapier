@@ -9,16 +9,21 @@
         "type": "git",
         "url": "git://github.com/teknoir/node-red-teknoir-zapier.git"
     },
-    "keywords": [ "node-red", "teknoir", "zapier" ],
+    "keywords": [
+        "node-red",
+        "teknoir",
+        "zapier"
+    ],
     "node-red": {
         "nodes": {
             "zap_trigger": "src/trigger.js",
-            "zap_action" : "src/action.js"
+            "zap_action": "src/action.js"
         }
     },
     "dependencies": {
-        "url-parse": "1.5.9",
+        "axios": "^1.5.0",
         "body-parser": "1.20.2",
-        "follow-redirects": "1.15.2"
+        "follow-redirects": "1.15.2",
+        "url-parse": "1.5.9"
     }
 }
