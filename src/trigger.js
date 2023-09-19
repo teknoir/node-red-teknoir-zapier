@@ -12,8 +12,8 @@ module.exports = function (RED) {
             const hookUrl = node.context().get('hookUrl'); // Get the stored hook URL
     
             
-            if (!subscribed || !hookUrl) {
-                node.status({ fill: "red", shape: "dot", text: "Unsubscribed or there is no hook URL" });
+            if (!subscribed) {
+                node.status({ fill: "red", shape: "dot", text: "Unsubscribed" });
                 return;
             }
 
@@ -42,16 +42,21 @@ module.exports = function (RED) {
             }
 
             node.context().set('cache', msg_cache);
-            
-            axios.post(hookUrl, { data: msg.payload })
-                .then(response => {
-                    console.log('Successfully sent data to Zapier:', response.data);
-                })
-                .catch(error => {
-                    console.error('Error sending data to Zapier:', error);
-                });
 
-            node.status({ fill: "green", shape: "dot", text: `cache size: ${msg_cache.length}` });
+            if (subscribed && hookUrl && msg_cache.length > 0) {
+                axios.post(hookUrl, { data: msg_cache })
+                    .then(response => {
+                        console.log('Successfully sent data to Zapier:', response.data);
+                    })
+                    .catch(error => {
+                        console.error('Error sending data to Zapier:', error);
+                    });
+            } else {
+                node.status({ fill: "red", shape: "dot", text: "unsubscribed or no hook URL" });
+            }
+
+
+            node.status({ fill: "green", shape: "dot", text: "cache size: " +msg_cache.length });
 
         });
     }
