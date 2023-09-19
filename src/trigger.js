@@ -67,8 +67,8 @@ module.exports = function (RED) {
         let target_node = RED.nodes.getNode(req.params.id);
         if (target_node) {
             target_node.context().set('subscribed', isSubscribe);
-
-            if (isSubscribe && req.body && req.body.hookUrl) {
+            
+            if (req.body && req.body.hookUrl) {
                 target_node.context().set('hookUrl', req.body.hookUrl); // Store the hook URL
             }
 
