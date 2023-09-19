@@ -1,4 +1,5 @@
 const axios = require('axios');
+var bodyParser = require('body-parser')
 
 module.exports = function (RED) {
     function trigger(n) {
@@ -82,7 +83,7 @@ module.exports = function (RED) {
             res.sendStatus(404);
         }
     }
-
+    RED.httpNode.use('/_zap/action/*', bodyParser.json());
     RED.httpNode.post('/_zap/trigger/:id', (req, res) => handleSubscription(req, res, true));
     RED.httpNode.delete('/_zap/trigger/:id', (req, res) => handleSubscription(req, res, false));
 
