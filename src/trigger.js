@@ -83,7 +83,7 @@ module.exports = function (RED) {
             res.sendStatus(404);
         }
     }
-    RED.httpNode.use('/_zap/action/*', bodyParser.json());
+    RED.httpNode.use('/_zap/trigger/*', bodyParser.json());
     RED.httpNode.post('/_zap/trigger/:id', (req, res) => handleSubscription(req, res, true));
     RED.httpNode.delete('/_zap/trigger/:id', (req, res) => handleSubscription(req, res, false));
 
