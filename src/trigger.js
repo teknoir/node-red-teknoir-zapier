@@ -78,7 +78,7 @@ module.exports = function (RED) {
                 target_node.context().set('cache', []); // Empty the cache
             }
 
-            const statusText = isSubscribe ? "subscribed" : "unsubscribed";
+            const statusText = isSubscribe ? "Subscribed" : "Unsubscribed";
 
             target_node.status({fill: isSubscribe ? "green" : "red", shape: "dot", text: statusText});
             
@@ -138,7 +138,7 @@ module.exports = function (RED) {
             const msg_cache = target_node.context().get('cache') || samples;
             res.send(msg_cache);
             target_node.context().set('cache', [])
-            target_node.status({fill: "green", shape: "dot", text: `cache emptied`});
+            target_node.status({fill: "green", shape: "dot", text: "Message cache emptied"});
         } else {
             res.sendStatus(404);
         }
