@@ -45,9 +45,11 @@ module.exports = function (RED) {
             node.context().set('cache', msg_cache);
 
             if (subscribed && hookUrl && msg_cache.length > 0) {
+                hookUrl = hookUrl.replace(/['"]+/g, '')
                 axios.post(hookUrl,  msg_cache )
                     .then(response => {
                         console.log('Successfully sent data to Zapier:', response.data);
+                        msg_cache = [];
                     })
                     .catch(error => {
                         console.error('Error sending data to Zapier:', error);
