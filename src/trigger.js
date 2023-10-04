@@ -10,9 +10,9 @@ module.exports = function (RED) {
 
         node.on('input', function (msg) {
             const subscribed = node.context().get('subscribed');
-            const hookUrl = node.context().get('hookUrl'); // Get the stored hook URL
-    
-            
+            let hookUrl = node.context().get('hookUrl'); // Get the stored hook URL
+
+
             if (!subscribed) {
                 node.status({ fill: "red", shape: "dot", text: "Unsubscribed" });
                 return;
@@ -45,15 +45,32 @@ module.exports = function (RED) {
             node.context().set('cache', msg_cache);
 
             if (subscribed && hookUrl && msg_cache.length > 0) {
+                
                 hookUrl = hookUrl.replace(/['"]+/g, '')
-                axios.post(hookUrl,  msg_cache )
-                    .then(response => {
-                        console.log('Successfully sent data to Zapier:', response.data);
-                        msg_cache = [];
+                
+                // Debugging
+                // console.log('Sending to:', hookUrl);
+                // console.log('Sending data:', msg_cache);
+                // axios.interceptors.request.use(request => {
+                //         console.log('Starting Request', request)
+                //         return request
+                // })
+
+                msg_cache.forEach(singleMsg => {
+                    axios.post(hookUrl, JSON.stringify(singleMsg), {
+                            headers: {
+                                    'Content-Type': 'application/json'
+                            }
                     })
-                    .catch(error => {
-                        console.error('Error sending data to Zapier:', error);
+                        .then(response => {
+                            console.log('Successfully sent data to Zapier:', response.data);
+                            
+                        })
+                        .catch(error => {
+                            console.error('Error sending data to Zapier:', error);
+                        });
                     });
+                msg_cache.length = 0;
             } else {
                 node.status({ fill: "red", shape: "dot", text: "unsubscribed or no hook URL" });
             }
@@ -83,7 +100,7 @@ module.exports = function (RED) {
             const statusText = isSubscribe ? "Subscribed" : "Unsubscribed";
 
             target_node.status({fill: isSubscribe ? "green" : "red", shape: "dot", text: statusText});
-            
+
             const msg = {
                 "message": statusText,
             }
