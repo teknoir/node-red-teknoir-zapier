@@ -6,8 +6,6 @@
         margin: 0;
     }
 
-
-
     /* Firefox */
     input[type=number] {
         -moz-appearance: textfield;
@@ -16,7 +14,7 @@
 
 <script type="text/javascript">
     RED.nodes.registerType('zap_trigger', {
-        category: 'network',
+        category: 'notification',
         color: '#ffffff',
         defaults: {
             name: {value: ""},
@@ -25,14 +23,70 @@
         },
         inputs: 1,
         outputs: 0,
-        icon: "tn_dark.svg",
+        icon: "Teknoir_RGB_LogoMark_BLK.svg",
         label: function () {
-            return this.name || "zap trigger";
+            return this.name || "Zapier Trigger";
         },
         paletteLabel: "Zapier Trigger",
         oneditprepare: function () {
             $("#node-input-url").val(window.location.origin + window.location.pathname + "_zap/trigger/" + this.id);
             $("#node-input-cache").val(this.cache);
+            var triggerNodeUrl = window.location.origin + window.location.pathname + "_zap/trigger/" + this.id;
+
+            updateOptionsAndIframe($("#template-selector").val());
+
+            // Corrected function name here
+            $("#template-selector").on("change", function (event) {
+                var selectedValue = $(this).val();
+                updateOptionsAndIframe(selectedValue);
+                $("#node-input-selectedTemplate").val(selectedValue);
+            });
+
+            function updateOptionsAndIframe(selectedValue) {
+                var optionsContainer = $("#options-container");
+                var iframeContainer = $("#iframe-container");
+                optionsContainer.empty();
+                iframeContainer.empty(); 
+                
+                var triggerNodeUrl = encodeURIComponent($("#node-input-url").val());
+                switch (selectedValue) {
+                    case "template1":
+                        // In case we want to the user to add something to the url
+                        // optionsContainer.append('<label for="port">Port:</label><input type="text" id="port" data-input-type="port" style="width:70%;" />');
+                        var iframeHtml = '<iframe id="zapier-iframe" src="https://api.zapier.com/v1/embed/teknoir/create?steps[0][app]=TeknoirCLIAPI@latest&steps[0][action]=new_event&steps[0][params][nodeurl]='+ triggerNodeUrl +'&steps[1][app]=MSTeamsCLIAPI@latest&steps[1][action]=send_chat_message" style="width:100%; height:70vh;"></iframe>';
+                        iframeContainer.append(iframeHtml);
+       
+                        break;
+
+                    case "template2":
+                        iframeContainer.empty();
+                        
+                        iframeContainer.append('<iframe src="https://api.zapier.com/v1/embed/teknoir/create?steps[0][app]=TeknoirCLIAPI@latest&steps[0][action]=new_event&steps[0][params][nodeurl]='+ triggerNodeUrl +'&steps[1][app]=SlackAPI&steps[1][action]=channel_message&steps[1][params][channel]=ACTION_CHANNEL&steps[1][params][text]=ACTION_TEXT" style="width:100%; height:70vh;"></iframe>');
+                        break;
+                    case "template3":
+                        iframeContainer.empty();
+                        
+                        iframeContainer.append('<iframe src="https://api.zapier.com/v1/embed/teknoir/create?steps[0][app]=TeknoirCLIAPI@latest&steps[0][action]=new_event&steps[0][params][nodeurl]='+ triggerNodeUrl +'&steps[1][app]=GoogleMailV2API&steps[1][action]=message&steps[1][params][subject]=ACTION_SUBJECT&steps[1][params][body]=ACTION_BODY" style="width:100%; height:300px;"></iframe>');
+                        break;                    
+                    case "template4":
+                        iframeContainer.empty();
+                        
+                        iframeContainer.append('<iframe src="https://api.zapier.com/v1/embed/teknoir/create?steps[0][app]=TeknoirCLIAPI@latest&steps[0][action]=new_event&steps[0][params][nodeurl]='+ triggerNodeUrl +'&steps[1][app]=TwilioAPI&steps[1][action]=smsv2&steps[1][params][from_number]=ACTION_FROM_NUMBER&steps[1][params][to_number]=ACTION_TO_NUMBER&steps[1][params][message]=ACTION_MESSAGE" style="width:100%; height:300px;"></iframe>');
+                        break;                    
+                    case "template5":
+                        iframeContainer.empty();
+                        
+                        iframeContainer.append('<iframe src="https://api.zapier.com/v1/embed/teknoir/create?steps[0][app]=TeknoirCLIAPI@latest&steps[0][action]=new_event&steps[0][params][nodeurl]='+ triggerNodeUrl +'&steps[1][app]=MicrosoftOutlookCLIAPI@latest&steps[1][action]=send_email&steps[1][params][recipients]=ACTION_RECIPIENTS&steps[1][params][subject]=ACTION_SUBJECT&steps[1][params][bodyFormat]=ACTION_BODY_FORMAT&steps[1][params][body]=ACTION_BODY" style="width:100%; height:300px;"></iframe>');
+                        break;
+                }
+            }
+            // Update defaults when inputs change
+            $("#options-container").on("input", "input", function (event) {
+                var inputType = $(this).data("input-type");
+                var value = $(this).val();
+                $("#node-input-" + inputType).val(value);
+            });
+        
         }
     });
 
@@ -45,7 +99,7 @@
     }
 </script>
 
-<script type="text/x-red" data-template-name="zap_trigger">
+<script type="text/html" data-template-name="zap_trigger">
     <div class="form-row">
         <label for="node-input-name">Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -58,6 +112,19 @@
         <label for="node-input-url">URL</label>
         <input type="text" id="node-input-url" readonly>
         <a id="node-input-copy-url" title="Copy URL to Clipboard" class="red-ui-button" onclick="copyURL()"><i class="fa fa-clipboard"></i></a>
+    </div>
+    <div id="zapier-container">
+        <label for="template-selector">Template:</label>
+        <select id="template-selector" style="width:100%;">
+            <option value="template1">Teknoir -> Microsoft Teams - no template</option>
+            <option value="template2">Teknoir -> Slack</option>
+            <option value="template3">Teknoir -> Gmail</option>
+            <option value="template4">Teknoir -> Twilio</option>
+            <option value="template5">Teknoir -> Microsoft Outlook</option>
+        </select>
+        <div id="options-container" style="margin-top:10px;"></div>
+        <!-- Added iframe container here -->
+        <div id="iframe-container" style="margin-top:10px;"></div>
     </div>
 </script>
 
