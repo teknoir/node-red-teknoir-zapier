@@ -78,6 +78,29 @@
                         
                         iframeContainer.append('<iframe src="https://api.zapier.com/v1/embed/teknoir/create?steps[0][app]=TeknoirCLIAPI@latest&steps[0][action]=new_event&steps[0][params][nodeurl]='+ triggerNodeUrl +'&steps[1][app]=MicrosoftOutlookCLIAPI@latest&steps[1][action]=send_email&steps[1][params][recipients]=ACTION_RECIPIENTS&steps[1][params][subject]=ACTION_SUBJECT&steps[1][params][bodyFormat]=ACTION_BODY_FORMAT&steps[1][params][body]=ACTION_BODY" style="width:100%; height:300px;"></iframe>');
                         break;
+                    case "template6":
+                        const script = document.createElement("script");
+                        script.type = "module";
+                        script.src = "https://cdn.zapier.com/packages/partner-sdk/v0/zapier-elements/zapier-elements.esm.js";
+                        document.head.appendChild(script);
+
+                        // Load CSS
+                        const stylesheet = document.createElement("link");
+                        stylesheet.rel = "stylesheet";
+                        stylesheet.href = "https://cdn.zapier.com/packages/partner-sdk/v0/zapier-elements/zapier-elements.css";
+                        document.head.appendChild(stylesheet);
+
+                        // Create and display zapier-full-experience
+                        const element = document.createElement("zapier-full-experience");
+                        element.clientId = "L7pEoNyAfU52IpWaSSksfAdDi71MYIlP16zGl8Zt";
+                        element.theme = "dark";
+                        element.introCopyDisplay = "hide";
+                        element.appSelectionDisplay = "hide";
+                        element.zapLimit = "0";
+                        element.zapCreateFromScratchDisplay = "hide";
+                        const container = document.querySelector("#zapier-container") || document.body;
+                        container.appendChild(element);
+                        break;
                 }
             }
             // Update defaults when inputs change
@@ -114,13 +137,14 @@
         <a id="node-input-copy-url" title="Copy URL to Clipboard" class="red-ui-button" onclick="copyURL()"><i class="fa fa-clipboard"></i></a>
     </div>
     <div id="zapier-container">
-        <label for="template-selector">Template:</label>
+        <label for="template-selector">Options:</label>
         <select id="template-selector" style="width:100%;">
-            <option value="template1">Teknoir -> Microsoft Teams - no template</option>
+            <option value="template1">Teknoir -> Microsoft Teams</option>
             <option value="template2">Teknoir -> Slack</option>
             <option value="template3">Teknoir -> Gmail</option>
             <option value="template4">Teknoir -> Twilio</option>
             <option value="template5">Teknoir -> Microsoft Outlook</option>
+            <option value="template6">Zapier Editor for existing templates</option>
         </select>
         <div id="options-container" style="margin-top:10px;"></div>
         <!-- Added iframe container here -->
