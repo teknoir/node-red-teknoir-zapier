@@ -48,6 +48,9 @@
                 optionsContainer.empty();
                 iframeContainer.empty(); 
                 
+                var defaultMessage = "[LOW/MEDIUM/HIGH/CRITICAL] severity message from Teknoir platform";
+
+                defaultMessage = encodeURIComponent(defaultMessage);
                 var triggerNodeUrl = encodeURIComponent($("#node-input-url").val());
                 var zapierElements = document.querySelectorAll('zapier-full-experience');
                         zapierElements.forEach(function(element) {
@@ -58,7 +61,7 @@
                         // In case we want to the user to add something to the url
                         // optionsContainer.append('<label for="port">Port:</label><input type="text" id="port" data-input-type="port" style="width:70%;" />');
                         
-                        var iframeHtml = '<iframe id="zapier-iframe" src="https://api.zapier.com/v1/embed/teknoir/create?steps[0][app]=TeknoirCLIAPI@latest&steps[0][action]=new_event&steps[0][params][nodeurl]='+ triggerNodeUrl +'&steps[1][app]=MSTeamsCLIAPI@latest&steps[1][action]=send_chat_message" style="width:100%; height:70vh;"></iframe>';
+                        var iframeHtml = '<iframe id="zapier-iframe" src="https://api.zapier.com/v1/embed/teknoir/create?steps[0][app]=TeknoirCLIAPI@latest&steps[0][action]=new_event&steps[0][params][nodeurl]='+ triggerNodeUrl +'&steps[1][app]=MSTeamsCLIAPI@latest&steps[1][action]=send_chat_message&steps[1][params][content]='+ defaultMessage +'" style="width:100%; height:70vh;"></iframe>';
                         
                         iframeContainer.append(iframeHtml);
        
@@ -67,7 +70,7 @@
                     case "template2":
                         iframeContainer.empty();
                         
-                        iframeContainer.append('<iframe src="https://api.zapier.com/v1/embed/teknoir/create?steps[0][app]=TeknoirCLIAPI@latest&steps[0][action]=new_event&steps[0][params][nodeurl]='+ triggerNodeUrl +'&steps[1][app]=SlackAPI&steps[1][action]=channel_message&steps[1][params][channel]=ACTION_CHANNEL&steps[1][params][text]=ACTION_TEXT" style="width:100%; height:70vh;"></iframe>');
+                        iframeContainer.append('<iframe src="https://api.zapier.com/v1/embed/teknoir/create?steps[0][app]=TeknoirCLIAPI@latest&steps[0][action]=new_event&steps[0][params][nodeurl]='+ triggerNodeUrl +'&steps[1][app]=SlackAPI&steps[1][action]=channel_message&steps[1][params][channel]=ACTION_CHANNEL&steps[1][params][text]='+ defaultMessage +'" style="width:100%; height:70vh;"></iframe>');
                         break;
                     case "template3":
                         iframeContainer.empty();
@@ -77,12 +80,12 @@
                     case "template4":
                         iframeContainer.empty();
                         
-                        iframeContainer.append('<iframe src="https://api.zapier.com/v1/embed/teknoir/create?steps[0][app]=TeknoirCLIAPI@latest&steps[0][action]=new_event&steps[0][params][nodeurl]='+ triggerNodeUrl +'&steps[1][app]=TwilioAPI&steps[1][action]=smsv2&steps[1][params][from_number]=ACTION_FROM_NUMBER&steps[1][params][to_number]=ACTION_TO_NUMBER&steps[1][params][message]=ACTION_MESSAGE" style="width:100%; height:300px;"></iframe>');
+                        iframeContainer.append('<iframe src="https://api.zapier.com/v1/embed/teknoir/create?steps[0][app]=TeknoirCLIAPI@latest&steps[0][action]=new_event&steps[0][params][nodeurl]='+ triggerNodeUrl +'&steps[1][app]=TwilioAPI&steps[1][action]=smsv2&steps[1][params][from_number]=ACTION_FROM_NUMBER&steps[1][params][to_number]=ACTION_TO_NUMBER&steps[1][params][message]='+ defaultMessage +'" style="width:100%; height:300px;"></iframe>');
                         break;                    
                     case "template5":
                         iframeContainer.empty();
                         
-                        iframeContainer.append('<iframe src="https://api.zapier.com/v1/embed/teknoir/create?steps[0][app]=TeknoirCLIAPI@latest&steps[0][action]=new_event&steps[0][params][nodeurl]='+ triggerNodeUrl +'&steps[1][app]=MicrosoftOutlookCLIAPI@latest&steps[1][action]=send_email&steps[1][params][recipients]=ACTION_RECIPIENTS&steps[1][params][subject]=ACTION_SUBJECT&steps[1][params][bodyFormat]=ACTION_BODY_FORMAT&steps[1][params][body]=ACTION_BODY" style="width:100%; height:300px;"></iframe>');
+                        iframeContainer.append('<iframe src="https://api.zapier.com/v1/embed/teknoir/create?steps[0][app]=TeknoirCLIAPI@latest&steps[0][action]=new_event&steps[0][params][nodeurl]='+ triggerNodeUrl +'&steps[1][app]=MicrosoftOutlookCLIAPI@latest&steps[1][action]=send_email&steps[1][params][recipients]=ACTION_RECIPIENTS&steps[1][params][subject]=ACTION_SUBJECT&steps[1][params][bodyFormat]=ACTION_BODY_FORMAT&steps[1][params][body]='+ defaultMessage +'" style="width:100%; height:300px;"></iframe>');
                         break;
                     case "template0":
 
@@ -162,8 +165,15 @@
 
 <script type="text/markdown" data-help-name="zap_trigger">
 
-### Creating a Zap
-The necessary URL to connect to Zapier has already been embedded and you just need to setup the Zap with your desired action.
+### How to add & connect the Zapier trigger?
+1. Add the Zapier trigger node to your flow 
+2. Deploy
+
+> If you don't **deploy** step 3 will not be able to activate the Zap
+
+3. Open and configure the desired Zap template
+
+Note: The trigger URL is already embedded so you don't have to copy it from the node configuration
 
 ### Zapier Editor
 In the embedded Zapier editor you can check your existing Zaps.
