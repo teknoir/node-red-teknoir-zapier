@@ -10,13 +10,6 @@
     input[type=number] {
         -moz-appearance: textfield;
     }
-    
-    .form-row {
-    display: flex;
-    align-items: center; /* This ensures vertical alignment of flex items */
-    justify-content: start; /* Adjusts horizontal positioning, if necessary */
-    gap: 10px; /* Adds some space between the flex items */
-}
 
 #zapier-container {
     display: flex;
@@ -87,7 +80,8 @@
         margin: auto;
         padding: 0;
         border: 1px solid var(--modal-border-color);
-        width: 50%;
+        width: 75%;
+        height: 80%;
         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
         animation-name: animatetop;
         animation-duration: 0.4s;
@@ -202,7 +196,7 @@ button#openEditor:hover {
                     template4: "Teknoir -> Twilio",
                     template5: "Teknoir -> Microsoft Outlook"
                 };
-                return templateNames[templateId] || ""; // Default text if ID not found
+                return templateNames[templateId] || "No Zap configured"; // Default text if ID not found
             }
             
             var iframeSources = {
@@ -276,11 +270,11 @@ button#openEditor:hover {
 
 <script type="text/html" data-template-name="zap_trigger">
     <input type="hidden" id="node-input-selectedTemplate">
-    <div class="form-row">
+    <div class="form-row" style="display: flex;">
         <label for="node-input-name">Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-row">
+    <div class="form-row" style="display: flex;">
         <label for="node-input-cache">Cache size</label>
         <input type="number" id="node-input-cache" placeholder="Cache Size">
     </div>
@@ -307,7 +301,7 @@ button#openEditor:hover {
             <button id="createZap">Create a new Zap for this node!</button>
         </div>
         <br>
-        <div class="form-row">
+        <div class="form-row" style="display: flex;">
             <label>Last configured Zap</label>
             <div id="last-used-template" class="template-message">No Zap configured</div>
         </div>
