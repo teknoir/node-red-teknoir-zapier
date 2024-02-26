@@ -142,6 +142,19 @@ button#openEditor:hover {
     justify-content: center; /* Center items horizontally */
 }
 
+.template-message {
+    display: block; /* Ensure it behaves like a block-level element */
+    background-color: var(--form-input-background); /* Use your form input background variable or a specific color */
+    color: var(--primary-text-color); /* Text color, adjust as needed */
+    border: 1px solid var(--primary-border-color); /* Mimic the border of input fields */
+    padding: 8px 12px; /* Provide some internal spacing */
+    font-family: var(--primary-font); /* Consistent font family */
+    font-size: var(--primary-font-size); /* Consistent font size */
+    border-radius: 4px; /* Optional: for rounded corners like inputs */
+    margin: 4px 0; /* Space it a bit from other elements */
+    width: calc(100% - 24px); /* Adjust width if necessary, accounting for padding */
+    box-sizing: border-box; /* Include padding and border in the element's total width */
+}
 </style>
 
 <script type="text/javascript">
@@ -171,8 +184,27 @@ button#openEditor:hover {
 
             var defaultMessage = "[LOW/MEDIUM/HIGH/CRITICAL] severity message from Teknoir platform";
 
-            defaultMessage = encodeURIComponent(defaultMessage);
+            var lastUsedTemplate = this.selectedTemplate;
+            var templateMessage = $("#last-used-template");
 
+            if (lastUsedTemplate) {
+                templateMessage.text(getTemplateNameById(lastUsedTemplate));
+            } else {
+                templateMessage.text("No template selected");
+            }
+
+            defaultMessage = encodeURIComponent(defaultMessage);
+            function getTemplateNameById(templateId) {
+                var templateNames = {
+                    template1: "Teknoir -> Microsoft Teams",
+                    template2: "Teknoir -> Slack",
+                    template3: "Teknoir -> Gmail",
+                    template4: "Teknoir -> Twilio",
+                    template5: "Teknoir -> Microsoft Outlook"
+                };
+                return templateNames[templateId] || ""; // Default text if ID not found
+            }
+            
             var iframeSources = {
                 template1: 'https://api.zapier.com/v1/embed/teknoir/create?steps[0][app]=TeknoirCLIAPI@latest&steps[0][action]=new_event&steps[0][params][nodeurl]=' + triggerNodeUrl + '&steps[1][app]=MSTeamsCLIAPI@latest&steps[1][action]=send_chat_message&steps[1][params][content]=' + defaultMessage + '',
                 template2: 'https://api.zapier.com/v1/embed/teknoir/create?steps[0][app]=TeknoirCLIAPI@latest&steps[0][action]=new_event&steps[0][params][nodeurl]=' + triggerNodeUrl + '&steps[1][app]=SlackAPI&steps[1][action]=channel_message&steps[1][params][channel]=ACTION_CHANNEL&steps[1][params][text]=' + defaultMessage + '',
@@ -258,7 +290,7 @@ button#openEditor:hover {
         <input type="text" id="node-input-url" readonly>
         <a id="node-input-copy-url" title="Copy URL to Clipboard" class="red-ui-button" onclick="copyURL()"><i class="fa fa-clipboard"></i></a>
     </div>
-    
+
     <div id="zapier-container">
         <label for="template-selector">Available Zaps </label>
         <select id="template-selector" style="width:100%;">
@@ -274,7 +306,11 @@ button#openEditor:hover {
         <div class="button-container">
             <button id="createZap">Create a new Zap for this node!</button>
         </div>
-
+        <br>
+        <div class="form-row">
+            <label>Last configured Zap</label>
+            <div id="last-used-template" class="template-message">No Zap configured</div>
+        </div>
         <div id="zapModal" class="modal">
             <div class="modal-content">
                 <div class="modal-body">
@@ -293,10 +329,6 @@ button#openEditor:hover {
 3. Open and configure the desired Zap template
 
 Note: The trigger URL is already embedded so you don't have to copy it from the node configuration
-
-### Zapier Editor
-In the embedded Zapier editor you can check your existing Zaps.
-To make your viewing experience better drag the node wider.
 
 ### Sending msg.payload to Zapier as a trigger
 
